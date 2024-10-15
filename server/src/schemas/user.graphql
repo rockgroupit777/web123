@@ -1,0 +1,45 @@
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  password: String!
+  firstName: String!
+  lastName: String!
+  avatar: String
+  role: Role
+  permissions: [String]
+  createdAt: String
+  updatedAt: String
+}
+enum Role {
+  SUPERADMIN
+  ADMIN
+  MEMBER
+}
+
+input CreateUserInput {
+  email: String!
+  username: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+  repeatPassword: String!
+  avatar: String
+}
+input UpdateUserInput {
+  firstName: String
+  lastName: String
+  password: String
+  repeatPassword: String
+  avatar: String
+}
+
+extend type Query {
+  getUser(id: ID!): User
+  listUsers: [User]
+}
+
+extend type Mutation {
+  createUser(name: String!, email: String!): User
+  deleteUser(id: ID!): Boolean
+}

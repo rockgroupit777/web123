@@ -1,1 +1,2 @@
-export const resolvers ={};
+const resolvers = {};
+export {resolvers}

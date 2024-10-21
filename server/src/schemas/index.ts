@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 // Function to read a GraphQL schema file
-const readSchemaFile = (filename: string) => {
+const readSchemaFile = (filename: string):string => {
     return fs.readFileSync(path.join(__dirname, filename), { encoding: 'utf-8' });
 };
 

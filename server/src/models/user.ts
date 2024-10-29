@@ -57,20 +57,33 @@ const userSchema = new Schema(
   );
 
 // Hash the password before saving the user
-userSchema.pre<UserDocument>("save", async function () {
+userSchema.pre<UserDocument>("save", async function (this: UserDocument) {
     if (this.isModified("password")) {
       this.password = await User.hash(this.password);
     }
   });
   
   // Static method to hash a password
-  userSchema.statics.hash = async (password: string): Promise<string> => {
-    return hash(password, 10);
+  userSchema.statics.hash = async function (password: string): Promise<string> {
+    if (!password) {
+      throw new Error("Password must be provided");
+    }
+    
+    return await hash(password, 10);
   };
   
   // Instance method to compare a password
   userSchema.methods.matchesPassword = async function (password: string): Promise<boolean> {
-    return compare(password, this.password);
+    if (!password) {
+      throw new Error("Password must be provided");
+    }
+  
+    try {
+      return await compare(password, this.password);
+    } catch (error) {
+      console.error("Error comparing passwords:", error);
+      throw new Error("Password comparison failed");
+    }
   };
 
 const User = model<UserDocument, UserModel>('User', userSchema);

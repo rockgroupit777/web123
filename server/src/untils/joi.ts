@@ -1,15 +1,14 @@
-import Joi, { ExtensionFactory } from 'joi'; // Import Joi
+import Joi, { ExtensionFactory, ObjectSchema } from 'joi'; // Import Joi
 import { Types } from 'mongoose'; // Import Types from mongoose
 
-// Create a custom Joi extension for validating MongoDB ObjectId
+// Custom Joi extension for validating MongoDB ObjectId
 const objectIdExtension: ExtensionFactory = (joi) => ({
   type: 'objectId',
-  base: joi.string(),
+  base: joi.string().length(24).hex(), // Ensures the string is 24 characters long and hexadecimal
   messages: {
     objectId: '"{{#label}}" must be a valid Object ID', // Error message for invalid ObjectId
   },
   validate(value: unknown, helpers) {
-    // Check if the value is a string and validate as ObjectId
     if (typeof value === 'string' && !Types.ObjectId.isValid(value)) {
       return { value, errors: helpers.error('objectId') }; // Return error if invalid
     }
@@ -20,6 +19,22 @@ const objectIdExtension: ExtensionFactory = (joi) => ({
 const objectIdSchema = Joi.extend(objectIdExtension);
 
 // Define the validation schema
-export const objectIdValidate = objectIdSchema.object({
+export const objectIdValidate: ObjectSchema = objectIdSchema.object({
   id: objectIdSchema.objectId().label('ObjectId').required(), // Mark as required
 });
+
+// Function to validate the input against the schema
+export async function validateInput(input: { id: string }): Promise<void> {
+  try {
+    const validated = await objectIdValidate.validateAsync(input); // Validate the input
+    console.log('Valid Object ID:', validated);
+  } catch (error) {
+    console.error('Validation error:', error.details); // Handle validation error
+  }
+}
+
+// Example test cases
+(async () => {
+  await validateInput({ id: '507f191e810c19729de860ea' }); // Valid ObjectId
+  await validateInput({ id: 'invalidObjectId' }); // Invalid ObjectId
+})();

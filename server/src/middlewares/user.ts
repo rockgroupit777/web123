@@ -2,7 +2,8 @@ import { GraphQLError } from 'graphql';
 import { User, UserDocument } from './models/User';
 
 const ERRORS = {
-  INCORRECT_CREDENTIALS: 'Incorrect email or password, please try again',
+  USER_NOT_FOUND: 'User not found',
+  PASSWORD_MISMATCH: 'Incorrect password',
 };
 
 interface SignInArgs {
@@ -10,21 +11,32 @@ interface SignInArgs {
   password: string;
 }
 
+// Helper function to throw authentication errors
+const throwAuthError = (message: string) => {
+  throw new GraphQLError(message, {
+    extensions: {
+      code: 'UNAUTHENTICATED',
+      http: { status: 401 },
+    },
+  });
+};
+
 const attemptSignIn = async (
   { email, password }: SignInArgs,
   fields?: string
 ): Promise<UserDocument> => {
-  // Find user by email with optional field projection
-  const user = await User.findOne({ email }).select(fields || '');
+  // Find user by email, applying field projection if specified
+  const user = fields ? await User.findOne({ email }).select(fields) : await User.findOne({ email });
 
-  // Validate user existence and password
-  if (!user || !(await user.matchesPassword(password))) {
-    throw new GraphQLError(ERRORS.INCORRECT_CREDENTIALS, {
-      extensions: {
-        code: 'UNAUTHENTICATED',
-        http: { status: 401 },
-      },
-    });
+  // Check if user exists
+  if (!user) {
+    throwAuthError(ERRORS.USER_NOT_FOUND);
+  }
+
+  // Verify password
+  const isMatch = await user.matchesPassword(password);
+  if (!isMatch) {
+    throwAuthError(ERRORS.PASSWORD_MISMATCH);
   }
 
   return user;

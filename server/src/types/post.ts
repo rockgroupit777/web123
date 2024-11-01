@@ -9,6 +9,6 @@ export interface PostDocument extends Document {
   photos?: [string];
   userId: UserDocument["_id"];
   status: boolean;
-  likes?: [UserDocument["_id"]];
+  likes?: Types.Array<UserDocument["_id"]>;
   commentStatus: boolean;
 }

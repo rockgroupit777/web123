@@ -3,6 +3,7 @@ import { hash, compare } from "bcryptjs";
 
 // Define enums for role and permissions
 enum UserRole {
+  GUEST = "GUEST",
   MEMBER = "MEMBER",
   ADMIN = "ADMIN",
 }

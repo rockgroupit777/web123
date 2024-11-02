@@ -1,1 +1,17 @@
+type Post {
+  id: ID!
+  title: String!
+  alias: String!
+  summary: String
+  content: String!
+  cover: String
+  photos: String
+  userId: ID!
+  status: Boolean!
+  likes: [ID]
+  commentStatus: Boolean
+}
 
+type Query {
+  posts(status: Boolean, userId: ID): [Post]
+}

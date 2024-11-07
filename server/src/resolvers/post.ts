@@ -1,6 +1,9 @@
+import { PubSub } from 'graphql-subscriptions';
 import { fields, objectId, objectIdValidate } from "../utils";
 import { Post, PostDocument, createPostValidate } from "./";
 import { GraphQLResolveInfo } from "graphql";
+
+const pubsub = new PubSub();
 
 interface PostArgs {
   postId: string;
@@ -67,4 +70,8 @@ export const postMutation = {
   },
 };
 
-export const postSubscription = {};
+export const postSubscription = {
+  postCreated: {
+    subscribe: () => pubsub.asyncIterator<PostDocument>('POST_CREATED')
+  }
+};

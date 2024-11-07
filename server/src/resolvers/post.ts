@@ -20,6 +20,19 @@ interface CreatePostArgs {
   createPostInput: CreatePostInput;
 }
 
+interface UpdatePostArgs {
+  postId: string;
+  updatePostInput: {
+    title?: string;
+    content?: string;
+    // Add other fields that are updatable
+  };
+}
+
+interface DeletePostArgs {
+  postId: string;
+}
+
 export const postQueries = {
   posts: async (
     parent: unknown,
@@ -68,10 +81,66 @@ export const postMutation = {
       throw new Error(`Failed to create post: ${(error as Error).message}`);
     }
   },
+  // Update a post
+  updatePost: async (
+    parent: unknown,
+    args: UpdatePostArgs,
+    context: unknown,
+    info: GraphQLResolveInfo
+  ): Promise<PostDocument | null> => {
+    try {
+      await objectIdValidate.validateAsync(args.postId);
+      await updatePostValidate.validateAsync(args.updatePostInput, { abortEarly: false });
+      
+      const updatedPost = await Post.findByIdAndUpdate(
+        args.postId,
+        args.updatePostInput,
+        { new: true } // Returns the updated document
+      ).exec();
+      
+      if (!updatedPost) throw new Error("Post not found");
+
+      // Publish the updated post event
+      pubsub.publish('POST_UPDATED', { postUpdated: updatedPost });
+
+      return updatedPost;
+    } catch (error) {
+      throw new Error(`Failed to update post: ${(error as Error).message}`);
+    }
+  },
+
+  // Delete a post
+  deletePost: async (
+    parent: unknown,
+    args: DeletePostArgs,
+    context: unknown,
+    info: GraphQLResolveInfo
+  ): Promise<PostDocument | null> => {
+    try {
+      await objectIdValidate.validateAsync(args.postId);
+
+      const deletedPost = await Post.findByIdAndDelete(args.postId).exec();
+      if (!deletedPost) throw new Error("Post not found");
+
+      // Publish the deleted post event
+      pubsub.publish('POST_DELETED', { postDeleted: deletedPost });
+
+      return deletedPost;
+    } catch (error) {
+      throw new Error(`Failed to delete post: ${(error as Error).message}`);
+    }
+  },
 };
 
 export const postSubscription = {
   postCreated: {
     subscribe: () => pubsub.asyncIterator<PostDocument>('POST_CREATED')
+  },
+  postUpdated: {
+    subscribe: () => pubsub.asyncIterator<PostDocument>('POST_UPDATED')
+  },
+
+  postDeleted: {
+    subscribe: () => pubsub.asyncIterator<PostDocument>('POST_DELETED')
   }
 };

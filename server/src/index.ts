@@ -6,11 +6,31 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import { typeDefs } from './schemas';
-import {resolvers} from './resolvers'
+import {resolvers} from './resolvers';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose'
+
+dotenv.config();
 
 interface MyContext {
   token?: String;
 }
+
+// Access environment variables from `process.env`
+const PORT = process.env.PORT || 3000;
+const MONGO_URI = process.env.MONGO_URI;
+
+// Connect to MongoDB
+const connectDB = async () => {
+  try {
+      await mongoose.connect(process.env.MONGO_URI, {});
+      console.log("CONNECTED TO DATABASE SUCCESSFULLY");
+  } catch (error) {
+      console.error('COULD NOT CONNECT TO DATABASE:', error.message);
+  }
+};
+
+connectDB();
 
 const app = express();
 const httpServer = http.createServer(app);

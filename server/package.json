@@ -4,8 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "compile": "tsc",
-    "start": "npm run compile && node ./dist/index.js"
+    "start": "tsx src/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -14,16 +13,17 @@
   "type": "module",
   "dependencies": {
     "@apollo/server": "^4.11.0",
-    "@graphql-tools/load-files": "^7.0.0",
-    "@graphql-tools/merge": "^9.0.8",
     "cors": "^2.8.5",
-    "express": "^4.21.1",
+    "dotenv": "^16.4.5",
     "graphql": "^16.9.0",
     "mongoose": "^8.7.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
-    "@types/node": "^22.7.7",
+    "@types/node": "^22.7.9",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.6.3"
   }
 }

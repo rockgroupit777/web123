@@ -7,7 +7,14 @@ interface PostArgs {
 }
 
 interface CreatePostInput {
-  createPostInput: any; // Define a specific type for the input if possible
+  title: string;
+  content: string;
+  authorId: string;
+  // Add other specific fields relevant to your Post model
+}
+
+interface CreatePostArgs {
+  createPostInput: CreatePostInput;
 }
 
 export const postQueries = {
@@ -17,7 +24,11 @@ export const postQueries = {
     context: unknown,
     info: GraphQLResolveInfo
   ): Promise<PostDocument[]> => {
-    return await Post.find({}).exec();
+    try {
+      return await Post.find({}).exec();
+    } catch (error) {
+      throw new Error(`Failed to fetch posts: ${(error as Error).message}`);
+    }
   },
 
   post: async (
@@ -28,9 +39,11 @@ export const postQueries = {
   ): Promise<PostDocument | null> => {
     try {
       await objectIdValidate.validateAsync(args.postId);
-      return await Post.findById(args.postId).exec();
+      const post = await Post.findById(args.postId).exec();
+      if (!post) throw new Error("Post not found");
+      return post;
     } catch (error) {
-      throw error;
+      throw new Error(`Failed to fetch post: ${(error as Error).message}`);
     }
   },
 };
@@ -38,7 +51,7 @@ export const postQueries = {
 export const postMutation = {
   createPost: async (
     parent: unknown,
-    args: CreatePostInput,
+    args: CreatePostArgs,
     context: unknown,
     info: GraphQLResolveInfo
   ): Promise<PostDocument> => {
@@ -46,9 +59,10 @@ export const postMutation = {
       await createPostValidate.validateAsync(args.createPostInput, {
         abortEarly: false,
       });
-      return await Post.create(args.createPostInput);
+      const newPost = await Post.create(args.createPostInput);
+      return newPost;
     } catch (error) {
-      throw error;
+      throw new Error(`Failed to create post: ${(error as Error).message}`);
     }
   },
 };

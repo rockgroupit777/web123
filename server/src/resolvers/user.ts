@@ -1,7 +1,8 @@
 import { PubSub } from 'graphql-subscriptions'; // Import PubSub for subscriptions
 import { Request } from 'express'; // Import Request type from Express
 import jwt from 'jsonwebtoken'; // Import JWT for token handling
-import { UserDocument, User } from './models/User'; // Assuming you have a User model
+import {User} from '../models'
+import { UserDocument} from './models/User'; // Assuming you have a User model
 import { signUpValidate, updateUserValidate, signInValidate } from './validation'; // Import validation schemas
 import config from './config'; // Import configuration for JWT secret
 

@@ -1,5 +1,6 @@
-import { Schema, model, Document, Model } from "mongoose";
+import { Schema, model, CallbackError} from "mongoose";
 import { hash, compare } from "bcryptjs";
+import {UserDocument,UserModel} from '../types'
 
 // Define enums for role and permissions
 enum UserRole {
@@ -13,23 +14,6 @@ enum Permission {
   READ_OWN = "READ_OWN",
   UPDATE_OWN = "UPDATE_OWN",
   DELETE_OWN = "DELETE_OWN",
-}
-
-// Define interfaces for the document and model
-interface UserDocument extends Document {
-  email: string;
-  username: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  avatar?: string;
-  role: UserRole;
-  permissions: Permission[];
-  matchesPassword(password: string): Promise<boolean>;
-}
-
-interface UserModel extends Model<UserDocument> {
-  hash(password: string): Promise<string>;
 }
 
 // Define the user schema
@@ -95,7 +79,7 @@ userSchema.pre("save", async function (next) {
     try {
       this.password = await User.hash(this.password);
     } catch (error) {
-      return next(error);
+      return next(error as CallbackError);
     }
   }
   next();

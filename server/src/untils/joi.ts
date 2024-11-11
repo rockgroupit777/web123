@@ -27,9 +27,13 @@ export const objectIdValidate: ObjectSchema = objectIdSchema.object({
 export async function validateInput(input: { id: string }): Promise<void> {
   try {
     const validated = await objectIdValidate.validateAsync(input); // Validate the input
-    console.log('Valid Object ID:', validated);
+    console.log('Valid Object ID:', validated.id);
   } catch (error) {
-    console.error('Validation error:', error.details); // Handle validation error
+    if (error instanceof Joi.ValidationError) {
+      console.error('Validation error:', error.details.map((detail) => detail.message));
+    } else {
+      console.error('Unexpected error:', error);
+    }; // Handle validation error
   }
 }
 

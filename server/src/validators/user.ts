@@ -27,34 +27,31 @@ const passwordSchema = Joi.string()
   .required()
   .label('Password');
 
-// Repeat password reference
-const repeatPasswordSchema = Joi.ref('password');
+// Repeat password validation
+const repeatPasswordSchema = Joi.any()
+  .valid(Joi.ref('password'))
+  .label('Repeat Password')
+  .messages({
+    'any.only': 'Repeat Password must match Password',
+  });
 
 // Optional fields
-const firstNameSchema = Joi.string()
-  .max(50)
-  .trim()
-  .label('FirstName');
-
-const lastNameSchema = Joi.string()
-  .max(50)
-  .trim()
-  .label('LastName');
-
+const firstNameSchema = Joi.string().max(50).trim().label('FirstName');
+const lastNameSchema = Joi.string().max(50).trim().label('LastName');
 const avatarSchema = Joi.string().label('Avatar');
 
-// Sign up validation schema
+// Sign-up validation schema
 export const signUpValidate: ObjectSchema = Joi.object({
   email: emailSchema,
   username: usernameSchema,
   password: passwordSchema,
-  repeatPassword: repeatPasswordSchema,
-  firstName: firstNameSchema.optional(), // Optional fields
-  lastName: lastNameSchema.optional(), // Optional fields
-  avatar: avatarSchema.optional(), // Optional fields
+  repeatPassword: repeatPasswordSchema.required(), // Ensure repeatPassword is required for sign-up
+  firstName: firstNameSchema.optional(),
+  lastName: lastNameSchema.optional(),
+  avatar: avatarSchema.optional(),
 });
 
-// Sign in validation schema
+// Sign-in validation schema
 export const signInValidate: ObjectSchema = Joi.object({
   email: emailSchema,
   password: passwordSchema,
@@ -62,10 +59,11 @@ export const signInValidate: ObjectSchema = Joi.object({
 
 // Update user validation schema
 export const updateUserValidate: ObjectSchema = Joi.object({
-  password: passwordSchema.optional(), // Optional field for updates
-  repeatPassword: repeatPasswordSchema.optional(), // Optional field for updates
-  firstName: firstNameSchema.optional(), // Optional fields
-  lastName: lastNameSchema.optional(), // Optional fields
-  avatar: avatarSchema.optional(), // Optional fields
+  password: passwordSchema.optional(),
+  repeatPassword: Joi.alternatives()
+    .try(repeatPasswordSchema, Joi.valid(null)) // Allow repeatPassword to be null or omitted in updates
+    .optional(),
+  firstName: firstNameSchema.optional(),
+  lastName: lastNameSchema.optional(),
+  avatar: avatarSchema.optional(),
 });
-

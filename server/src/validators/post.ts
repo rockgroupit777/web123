@@ -31,3 +31,16 @@ export const createPostValidate = Joi.object({
   commentStatus,
 });
 
+// Define TypeScript interface for type checking the validation
+export interface CreatePostInput {
+  title: string;
+  alias: string;
+  summary?: string;
+  content: string;
+  cover?: string;
+  photos?: string[];
+  userId: string;
+  status?: boolean;
+  likes?: string[];
+  commentStatus?: boolean;
+}
